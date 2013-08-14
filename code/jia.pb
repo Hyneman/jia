@@ -46,6 +46,14 @@ CompilerEndIf
 #JIA_COLOR_TEXT = 7
 #JIA_COLOR_BACKGROUND = 0
 
+#JIA_EXTENSION_DIRECTORY = "extensions"
+
+CompilerIf #PB_Compiler_OS = #PB_OS_Windows
+	#JIA_PATH_SEPARATOR = "\"
+CompilerElse
+	#JIA_PATH_SEPARATOR = "/"
+CompilerEndIf
+
 
 ; // end region
 ; // region ...Structures...
@@ -94,6 +102,11 @@ Procedure.s GetArgumentAtIndex(List arguments.s(), index.i)
 	
 	SelectElement(arguments(), index)
 	ProcedureReturn arguments()
+EndProcedure
+
+Procedure.s GetExtensionPath()
+	
+	ProcedureReturn GetPathPart(ProgramFilename()) + #JIA_EXTENSION_DIRECTORY + #JIA_PATH_SEPARATOR
 EndProcedure
 
 Procedure.s ParseCommandFromInput(input.s)
@@ -229,6 +242,35 @@ Procedure.i InitializeBuiltInCommands()
 	ProcedureReturn #True
 EndProcedure
 
+Procedure.i ExecuteCommandExtension(command.s, input.s)
+	Protected directory.i
+	Protected currentExtension.s
+	Protected exitCode.i
+	
+	directory = ExamineDirectory(#PB_Any, GetExtensionPath(), "*.*")
+	If Not directory
+		PrintN("Unknown Command; extension directory could not be examined.")
+		ProcedureReturn #False
+	EndIf
+	
+	exitCode = -1
+	While NextDirectoryEntry(directory)
+		currentExtension = LCase(DirectoryEntryName(directory))
+		If GetFilePart(currentExtension, #PB_FileSystem_NoExtension) = command
+			exitCode = RunProgram(GetExtensionPath() + currentExtension, input, GetCurrentDirectory(), #PB_Program_Wait)
+			Break
+		EndIf
+	Wend
+	FinishDirectory(directory)
+	
+	If exitCode < 0
+		PrintN("Unknown Command.")
+		ProcedureReturn #JIA_FAILURE
+	EndIf
+	
+	ProcedureReturn exitCode
+EndProcedure
+
 Procedure.i ExecuteCommand(command.s, input.s, List arguments.s())
 	Protected *delegate.BuiltInCommandPrototype
 	
@@ -237,7 +279,7 @@ Procedure.i ExecuteCommand(command.s, input.s, List arguments.s())
 		ProcedureReturn *delegate(input, arguments())
 	EndIf
 	
-	ProcedureReturn #False
+	ProcedureReturn ExecuteCommandExtension(command, input)
 EndProcedure
 
 Procedure.i ExecuteCommandWithProgramArguments()
@@ -316,9 +358,9 @@ EndProcedure : End EntryPoint()
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 302
-; FirstLine = 279
-; Folding = ----
+; CursorPosition = 259
+; FirstLine = 244
+; Folding = -----
 ; EnableUnicode
 ; EnableXP
-; CommandLine = get path
+; CompileSourceDirectory
