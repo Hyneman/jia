@@ -194,6 +194,15 @@ Procedure.i SetBuiltInCommand(command.s, *callback.BuiltInCommandPrototype)
 	ProcedureReturn #True
 EndProcedure
 
+Procedure.i CommandCmd(input.s, List arguments.s())
+	Protected command.s
+	
+	command = GetArgumentAtIndex(arguments(), 0)
+	input = Mid(Trim(input), Len(command) + 1)
+	
+	ProcedureReturn RunProgram(command, input, GetCurrentDirectory(), #PB_Program_Wait)
+EndProcedure
+
 Procedure.i CommandCurrentDirectory(input.s, List arguments.s())
 	
 	input = Trim(input)
@@ -235,6 +244,7 @@ EndProcedure
 
 Procedure.i InitializeBuiltInCommands()
 	
+	BuiltInCommandsMap("cmd") = @CommandCmd()
 	BuiltInCommandsMap("cd") = @CommandCurrentDirectory()
 	BuiltInCommandsMap("get") = @CommandGet()
 	BuiltInCommandsMap("set") = @CommandSet()
@@ -358,8 +368,8 @@ EndProcedure : End EntryPoint()
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 259
-; FirstLine = 244
+; CursorPosition = 201
+; FirstLine = 181
 ; Folding = -----
 ; EnableUnicode
 ; EnableXP
