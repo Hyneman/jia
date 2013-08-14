@@ -242,12 +242,59 @@ Procedure.i CommandSet(input.s, List arguments.s())
 	ProcedureReturn #True
 EndProcedure
 
+Procedure.i CommandExtensions(input.s, List arguments.s())
+	Protected directory.i
+	Protected current.s
+	Protected NewList extensionList.s()
+	
+	directory = ExamineDirectory(#PB_Any, GetExtensionPath(), "*.*")
+	If Not directory
+		ProcedureReturn #JIA_FAILURE
+	EndIf
+	
+	While NextDirectoryEntry(directory)
+		If DirectoryEntryType(directory) = #PB_DirectoryEntry_Directory
+			Continue
+		EndIf
+		
+		If DirectoryEntryAttributes(directory) & #PB_FileSystem_Hidden
+			Continue
+		EndIf
+		
+		current = LCase(GetFilePart(DirectoryEntryName(directory), #PB_FileSystem_NoExtension))
+		If current = "." Or current = ".."
+			Continue
+		EndIf
+		
+		If Left(current, 1) = "."
+			Continue
+		EndIf
+		
+		ForEach extensionList()
+			If extensionList() = current
+				Continue
+			EndIf
+		Next
+		
+		AddElement(extensionList())
+		extensionList() = current
+	Wend
+	FinishDirectory(directory)
+	
+	ForEach extensionList()
+		PrintN(extensionList())
+	Next
+	
+	ProcedureReturn #JIA_SUCCESS
+EndProcedure
+
 Procedure.i InitializeBuiltInCommands()
 	
-	BuiltInCommandsMap("cmd") = @CommandCmd()
-	BuiltInCommandsMap("cd") = @CommandCurrentDirectory()
-	BuiltInCommandsMap("get") = @CommandGet()
-	BuiltInCommandsMap("set") = @CommandSet()
+	SetBuiltInCommand("cmd", @CommandCmd())
+	SetBuiltInCommand("cd", @CommandCurrentDirectory())
+	SetBuiltInCommand("get", @CommandGet())
+	SetBuiltInCommand("set", @CommandSet())
+	SetBuiltInCommand("extensions", @CommandExtensions())
 	
 	ProcedureReturn #True
 EndProcedure
@@ -260,12 +307,24 @@ Procedure.i ExecuteCommandExtension(command.s, input.s)
 	directory = ExamineDirectory(#PB_Any, GetExtensionPath(), "*.*")
 	If Not directory
 		PrintN("Unknown Command; extension directory could not be examined.")
-		ProcedureReturn #False
+		ProcedureReturn #JIA_FAILURE
 	EndIf
 	
 	exitCode = -1
 	While NextDirectoryEntry(directory)
+		If DirectoryEntryType(directory) = #PB_DirectoryEntry_Directory
+			Continue
+		EndIf
+		
+		If DirectoryEntryAttributes(directory) & #PB_FileSystem_Hidden
+			Continue
+		EndIf
+		
 		currentExtension = LCase(DirectoryEntryName(directory))
+		If currentExtension = "." Or currentExtension = ".."
+			Continue
+		EndIf
+		
 		If GetFilePart(currentExtension, #PB_FileSystem_NoExtension) = command
 			exitCode = RunProgram(GetExtensionPath() + currentExtension, input, GetCurrentDirectory(), #PB_Program_Wait)
 			Break
@@ -368,8 +427,8 @@ EndProcedure : End EntryPoint()
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 201
-; FirstLine = 181
+; CursorPosition = 275
+; FirstLine = 251
 ; Folding = -----
 ; EnableUnicode
 ; EnableXP
