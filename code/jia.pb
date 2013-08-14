@@ -90,6 +90,12 @@ Procedure.i IsWhiteSpace(character.c)
 	ProcedureReturn #False
 EndProcedure
 
+Procedure.s GetArgumentAtIndex(List arguments.s(), index.i)
+	
+	SelectElement(arguments(), index)
+	ProcedureReturn arguments()
+EndProcedure
+
 Procedure.s ParseCommandFromInput(input.s)
 	Protected command.s
 	Protected *character.Character
@@ -187,9 +193,39 @@ Procedure.i CommandCurrentDirectory(input.s, List arguments.s())
 	ProcedureReturn #True
 EndProcedure
 
+Procedure.i CommandGet(input.s, List arguments.s())
+	
+	If ListSize(arguments()) = 0
+		ProcedureReturn #False
+	EndIf
+	
+	FirstElement(arguments())
+	PrintN(GetEnvironmentVariable(arguments()))
+	
+	ProcedureReturn #True
+EndProcedure
+
+Procedure.i CommandSet(input.s, List arguments.s())
+	Protected name.s
+	Protected value.s
+	
+	If ListSize(arguments()) <> 2
+		ProcedureReturn #False
+	EndIf
+	
+	name = GetArgumentAtIndex(arguments(), 0)
+	value = GetArgumentAtIndex(arguments(), 1)
+	
+	SetEnvironmentVariable(name, value)
+	
+	ProcedureReturn #True
+EndProcedure
+
 Procedure.i InitializeBuiltInCommands()
 	
 	BuiltInCommandsMap("cd") = @CommandCurrentDirectory()
+	BuiltInCommandsMap("get") = @CommandGet()
+	BuiltInCommandsMap("set") = @CommandSet()
 	
 	ProcedureReturn #True
 EndProcedure
@@ -258,8 +294,8 @@ EndProcedure : End EntryPoint()
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 175
-; FirstLine = 123
-; Folding = ---
+; CursorPosition = 216
+; FirstLine = 213
+; Folding = ----
 ; EnableUnicode
 ; EnableXP
