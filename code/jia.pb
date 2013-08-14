@@ -60,7 +60,7 @@ EndStructure
 ; // region ...Prototypes...
 
 
-Prototype.i BuiltInCommandPrototype(List arguments.s())
+Prototype.i BuiltInCommandPrototype(input.s, List arguments.s())
 
 
 ; // end region
@@ -175,9 +175,15 @@ Procedure.i SetBuiltInCommand(command.s, *callback.BuiltInCommandPrototype)
 	ProcedureReturn #True
 EndProcedure
 
-Procedure.i CommandCurrentDirectory(List arguments.s())
+Procedure.i CommandCurrentDirectory(input.s, List arguments.s())
 	
-	PrintN(GetCurrentDirectory())
+	input = Trim(input)
+	If input = ""
+		PrintN(GetCurrentDirectory())
+	Else
+		SetCurrentDirectory(input)
+	EndIf
+	
 	ProcedureReturn #True
 EndProcedure
 
@@ -188,12 +194,12 @@ Procedure.i InitializeBuiltInCommands()
 	ProcedureReturn #True
 EndProcedure
 
-Procedure.i ExecuteCommand(command.s, List arguments.s())
+Procedure.i ExecuteCommand(command.s, input.s, List arguments.s())
 	Protected *delegate.BuiltInCommandPrototype
 	
 	*delegate = BuiltInCommandsMap(command)
 	If *delegate
-		ProcedureReturn *delegate(arguments())
+		ProcedureReturn *delegate(input, arguments())
 	EndIf
 	
 	ProcedureReturn #False
@@ -207,15 +213,22 @@ Procedure.i ReadExecuteWriteLoop()
 	Repeat
 		WritePrompt()
 		
-		input = Input()
-		command = LCase(ParseCommandFromInput(input))
+		input = Trim(Input())
+		If input = ""
+			Continue
+		EndIf
+		
 		ParseCommandArgumentsFromInput(input, arguments())
+		
+		FirstElement(arguments())
+		command = LCase(arguments())
+		DeleteElement(arguments(), 1)
 		
 		If command = "exit"
 			Break
 		EndIf
 		
-		ExecuteCommand(command, arguments())
+		ExecuteCommand(command, Mid(input, Len(command) + 1), arguments())
 	ForEver	
 	
 	ProcedureReturn #True
@@ -244,8 +257,9 @@ EndProcedure : End EntryPoint()
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 179
-; FirstLine = 162
+; ExecutableFormat = Console
+; CursorPosition = 175
+; FirstLine = 123
 ; Folding = ---
 ; EnableUnicode
 ; EnableXP
