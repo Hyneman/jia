@@ -201,7 +201,6 @@ Procedure.i CommandGet(input.s, List arguments.s())
 	
 	FirstElement(arguments())
 	PrintN(GetEnvironmentVariable(arguments()))
-	
 	ProcedureReturn #True
 EndProcedure
 
@@ -241,6 +240,25 @@ Procedure.i ExecuteCommand(command.s, input.s, List arguments.s())
 	ProcedureReturn #False
 EndProcedure
 
+Procedure.i ExecuteCommandWithProgramArguments()
+	Protected NewList arguments.s()
+	Protected input.s
+	Protected command.s
+	Protected count.i
+	Protected i.i
+	
+	count = CountProgramParameters() - 1
+	command = ProgramParameter(0)
+	For i = 1 To count
+		AddElement(arguments())
+		arguments() = ProgramParameter(i)
+		input + ProgramParameter(i) + " "
+	Next
+	
+	input = RTrim(input)
+	ProcedureReturn ExecuteCommand(command, input, arguments())
+EndProcedure
+
 Procedure.i ReadExecuteWriteLoop()
 	Protected input.s
 	Protected command.s
@@ -271,6 +289,7 @@ Procedure.i ReadExecuteWriteLoop()
 EndProcedure
 
 Procedure.i EntryPoint()
+	Protected exitCode.i
 	
 	If Not OpenConsole()
 		ProcedureReturn #JIA_FAILURE
@@ -279,10 +298,13 @@ Procedure.i EntryPoint()
 	InitializeBuiltInCommands()
 	If CountProgramParameters() = 0
 		ReadExecuteWriteLoop()
+		exitCode = #JIA_SUCCESS
+	Else
+		exitCode = ExecuteCommandWithProgramArguments()
 	EndIf
 	
 	CloseConsole()
-	ProcedureReturn #JIA_SUCCESS
+	ProcedureReturn exitCode
 EndProcedure : End EntryPoint()
 
 
@@ -294,8 +316,9 @@ EndProcedure : End EntryPoint()
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 216
-; FirstLine = 213
+; CursorPosition = 302
+; FirstLine = 279
 ; Folding = ----
 ; EnableUnicode
 ; EnableXP
+; CommandLine = get path
