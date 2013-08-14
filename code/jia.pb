@@ -51,6 +51,21 @@ CompilerEndIf
 ; // region ...Procedures....
 
 
+Procedure.i IsWhiteSpace(character.c)
+	
+	Select character
+		Case $0020, $00A0, $1680, $180E, $2000,
+		     $2001, $2002, $2003, $2004,
+		     $2005, $2006, $2007, $2008,
+		     $2009, $200A, $200B, $202F,
+		     $205F, $3000, $FEFF
+			ProcedureReturn #True
+			
+	EndSelect
+	
+	ProcedureReturn #False
+EndProcedure
+
 Procedure.s ParseCommandFromInput(input.s)
 	Protected command.s
 	Protected *character.Character
@@ -58,7 +73,7 @@ Procedure.s ParseCommandFromInput(input.s)
 	*character = @input
 	While *character\c <> #Null
 		
-		If *character\c = ' '
+		If IsWhiteSpace(*character\c)
 			Break
 		EndIf
 		
@@ -119,8 +134,8 @@ EndProcedure : End EntryPoint()
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 104
-; FirstLine = 62
+; CursorPosition = 77
+; FirstLine = 60
 ; Folding = --
 ; EnableUnicode
 ; EnableXP
