@@ -25,16 +25,71 @@
 EnableExplicit
 
 
+; // region ...Compiler Constraints...
+
+
+CompilerIf Not #PB_Compiler_Unicode
+	CompilerError "Unicode Support has to be enabled in order to compile this project."
+CompilerEndIf
+
+
+; // end region
 ; // region ...Constants...
 
 
 #JIA_SUCCESS = 0
 #JIA_FAILURE = 1
 
+#JIA_PROMPT = "> jia "
+
+#JIA_COLOR_PROMPT = 10
+#JIA_COLOR_TEXT = 7
+#JIA_COLOR_BACKGROUND = 0
+
 
 ; // end region
 ; // region ...Procedures....
 
+
+Procedure.s ParseCommandFromInput(input.s)
+	Protected command.s
+	Protected *character.Character
+	
+	*character = @input
+	While *character\c <> #Null
+		
+		If *character\c = ' '
+			Break
+		EndIf
+		
+		command + Chr(*character\c)
+		*character + SizeOf(Character)
+	Wend
+	
+	ProcedureReturn command
+EndProcedure
+
+Procedure.i ReadExecuteWriteLoop()
+	Protected input.s
+	Protected command.s
+	
+	Repeat
+		ConsoleColor(#JIA_COLOR_PROMPT, #JIA_COLOR_BACKGROUND)
+		Print(#JIA_PROMPT)
+		ConsoleColor(#JIA_COLOR_TEXT, #JIA_COLOR_BACKGROUND)
+		
+		input = Input()
+		command = LCase(ParseCommandFromInput(input))
+		Select command
+				
+			Case "exit"
+				Break
+				
+		EndSelect
+	ForEver	
+	
+	ProcedureReturn #True
+EndProcedure
 
 Procedure.i EntryPoint()
 	
@@ -42,6 +97,10 @@ Procedure.i EntryPoint()
 		ProcedureReturn #JIA_FAILURE
 	EndIf
 	
+	
+	If CountProgramParameters() = 0
+		ReadExecuteWriteLoop()
+	EndIf
 	
 	CloseConsole()
 	ProcedureReturn #JIA_SUCCESS
@@ -53,9 +112,10 @@ EndProcedure : End EntryPoint()
 
 
 
+
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 43
-; FirstLine = 18
-; Folding = -
+; CursorPosition = 44
+; FirstLine = 31
+; Folding = --
 ; EnableUnicode
 ; EnableXP
