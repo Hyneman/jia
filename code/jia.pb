@@ -25,12 +25,37 @@
 EnableExplicit
 
 
-OpenConsole()
-Input()
+; // region ...Constants...
+
+
+#JIA_SUCCESS = 0
+#JIA_FAILURE = 1
+
+
+; // end region
+; // region ...Procedures....
+
+
+Procedure.i EntryPoint()
+	
+	If Not OpenConsole()
+		ProcedureReturn #JIA_FAILURE
+	EndIf
+	
+	
+	CloseConsole()
+	ProcedureReturn #JIA_SUCCESS
+EndProcedure : End EntryPoint()
+
+
+; // end region
+
 
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 19
+; CursorPosition = 43
+; FirstLine = 18
+; Folding = -
 ; EnableUnicode
 ; EnableXP
