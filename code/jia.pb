@@ -48,10 +48,19 @@ CompilerEndIf
 
 
 ; // end region
+; // region ...Structures...
+
+
+Structure CharArray
+	c.c[0]
+EndStructure
+
+
+; // end region
 ; // region ...Prototypes...
 
 
-Prototype.i BuiltInCommandPrototype()
+Prototype.i BuiltInCommandPrototype(List arguments.s())
 
 
 ; // end region
@@ -99,6 +108,54 @@ Procedure.s ParseCommandFromInput(input.s)
 	ProcedureReturn command
 EndProcedure
 
+Procedure.i ParseCommandArgumentsFromInput(input.s, List arguments.s())
+	Protected *input.CharArray
+	Protected counter.i
+	Protected current.s
+	Protected isQuoted.i
+	
+	*input = @input
+	counter = 0
+	isQuoted = #False
+	
+	ClearList(arguments())
+	While *input\c[counter] <> #Null
+		If isQuoted
+			If *input\c[counter] = '"'
+				If *input\c[counter + 1] = '"'
+					current + #DQUOTE$
+					counter + 2
+				Else
+					isQuoted = #False
+					counter + 1
+				EndIf
+			Else
+				current + Chr(*input\c[counter])
+				counter + 1
+			EndIf
+		ElseIf *input\c[counter] = '"'
+			isQuoted = #True
+			counter + 1
+		ElseIf IsWhiteSpace(*input\c[counter])
+			AddElement(arguments())
+			arguments() = current
+			
+			current = ""
+			counter + 1
+		Else
+			current + Chr(*input\c[counter])
+			counter + 1
+		EndIf			
+	Wend
+	
+	If current
+		AddElement(arguments())
+		arguments() = current
+	EndIf
+
+	ProcedureReturn #False
+EndProcedure
+
 Procedure.i WritePrompt()
 	
 	ConsoleColor(#JIA_COLOR_PROMPT, #JIA_COLOR_BACKGROUND)
@@ -118,7 +175,7 @@ Procedure.i SetBuiltInCommand(command.s, *callback.BuiltInCommandPrototype)
 	ProcedureReturn #True
 EndProcedure
 
-Procedure.i CommandCurrentDirectory()
+Procedure.i CommandCurrentDirectory(List arguments.s())
 	
 	PrintN(GetCurrentDirectory())
 	ProcedureReturn #True
@@ -131,26 +188,34 @@ Procedure.i InitializeBuiltInCommands()
 	ProcedureReturn #True
 EndProcedure
 
+Procedure.i ExecuteCommand(command.s, List arguments.s())
+	Protected *delegate.BuiltInCommandPrototype
+	
+	*delegate = BuiltInCommandsMap(command)
+	If *delegate
+		ProcedureReturn *delegate(arguments())
+	EndIf
+	
+	ProcedureReturn #False
+EndProcedure
+
 Procedure.i ReadExecuteWriteLoop()
 	Protected input.s
 	Protected command.s
-	Protected *delegate.BuiltInCommandPrototype
+	Protected NewList arguments.s()
 	
 	Repeat
 		WritePrompt()
+		
 		input = Input()
 		command = LCase(ParseCommandFromInput(input))
+		ParseCommandArgumentsFromInput(input, arguments())
 		
 		If command = "exit"
 			Break
 		EndIf
-				
-		*delegate = BuiltInCommandsMap(command)
-		If *delegate
-			*delegate()
-		EndIf
 		
-		
+		ExecuteCommand(command, arguments())
 	ForEver	
 	
 	ProcedureReturn #True
@@ -179,8 +244,8 @@ EndProcedure : End EntryPoint()
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 135
-; FirstLine = 120
+; CursorPosition = 179
+; FirstLine = 162
 ; Folding = ---
 ; EnableUnicode
 ; EnableXP
