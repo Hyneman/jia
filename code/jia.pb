@@ -48,6 +48,21 @@ CompilerEndIf
 
 
 ; // end region
+; // region ...Prototypes...
+
+
+Prototype.i BuiltInCommandPrototype()
+
+
+; // end region
+; // region ...Globals...
+
+
+; // Use integer type because PureBasic is still not able to support prototypes with maps (*sigh*).
+Global NewMap BuiltInCommandsMap.i()
+
+
+; // end region
 ; // region ...Procedures....
 
 
@@ -93,23 +108,49 @@ Procedure.i WritePrompt()
 	ProcedureReturn #True
 EndProcedure
 
+Procedure.i SetBuiltInCommand(command.s, *callback.BuiltInCommandPrototype)
+	
+	If command = "" Or *callback = #Null
+		ProcedureReturn #False
+	EndIf
+	
+	BuiltInCommandsMap(command) = *callback
+	ProcedureReturn #True
+EndProcedure
+
+Procedure.i CommandCurrentDirectory()
+	
+	PrintN(GetCurrentDirectory())
+	ProcedureReturn #True
+EndProcedure
+
+Procedure.i InitializeBuiltInCommands()
+	
+	BuiltInCommandsMap("cd") = @CommandCurrentDirectory()
+	
+	ProcedureReturn #True
+EndProcedure
+
 Procedure.i ReadExecuteWriteLoop()
 	Protected input.s
 	Protected command.s
+	Protected *delegate.BuiltInCommandPrototype
 	
 	Repeat
 		WritePrompt()
 		input = Input()
 		command = LCase(ParseCommandFromInput(input))
-		Select command
+		
+		If command = "exit"
+			Break
+		EndIf
 				
-			Case "exit"
-				Break
-				
-			Case "cd"
-				PrintN(GetCurrentDirectory())
-				
-		EndSelect
+		*delegate = BuiltInCommandsMap(command)
+		If *delegate
+			*delegate()
+		EndIf
+		
+		
 	ForEver	
 	
 	ProcedureReturn #True
@@ -121,6 +162,7 @@ Procedure.i EntryPoint()
 		ProcedureReturn #JIA_FAILURE
 	EndIf
 	
+	InitializeBuiltInCommands()
 	If CountProgramParameters() = 0
 		ReadExecuteWriteLoop()
 	EndIf
@@ -137,8 +179,8 @@ EndProcedure : End EntryPoint()
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 109
-; FirstLine = 94
-; Folding = --
+; CursorPosition = 135
+; FirstLine = 120
+; Folding = ---
 ; EnableUnicode
 ; EnableXP
