@@ -427,9 +427,20 @@ EndProcedure : End EntryPoint()
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
 ; ExecutableFormat = Console
-; CursorPosition = 275
-; FirstLine = 251
+; CursorPosition = 169
+; FirstLine = 162
 ; Folding = -----
 ; EnableUnicode
 ; EnableXP
 ; CompileSourceDirectory
+; IncludeVersionInfo
+; VersionField0 = 1.0.0.0
+; VersionField1 = 1.0.0.0
+; VersionField2 = Silent Byte
+; VersionField3 = Jia
+; VersionField4 = 1.0
+; VersionField5 = 1.0
+; VersionField6 = Jia Shell Extensions
+; VersionField7 = Jia
+; VersionField8 = jia.exe
+; VersionField9 = Copyright (c) 2013 by Silent Byte
