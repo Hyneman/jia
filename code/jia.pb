@@ -69,15 +69,21 @@ Procedure.s ParseCommandFromInput(input.s)
 	ProcedureReturn command
 EndProcedure
 
+Procedure.i WritePrompt()
+	
+	ConsoleColor(#JIA_COLOR_PROMPT, #JIA_COLOR_BACKGROUND)
+	Print(#JIA_PROMPT)
+	ConsoleColor(#JIA_COLOR_TEXT, #JIA_COLOR_BACKGROUND)
+	
+	ProcedureReturn #True
+EndProcedure
+
 Procedure.i ReadExecuteWriteLoop()
 	Protected input.s
 	Protected command.s
 	
 	Repeat
-		ConsoleColor(#JIA_COLOR_PROMPT, #JIA_COLOR_BACKGROUND)
-		Print(#JIA_PROMPT)
-		ConsoleColor(#JIA_COLOR_TEXT, #JIA_COLOR_BACKGROUND)
-		
+		WritePrompt()
 		input = Input()
 		command = LCase(ParseCommandFromInput(input))
 		Select command
@@ -97,7 +103,6 @@ Procedure.i EntryPoint()
 		ProcedureReturn #JIA_FAILURE
 	EndIf
 	
-	
 	If CountProgramParameters() = 0
 		ReadExecuteWriteLoop()
 	EndIf
@@ -114,8 +119,8 @@ EndProcedure : End EntryPoint()
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 44
-; FirstLine = 31
+; CursorPosition = 104
+; FirstLine = 62
 ; Folding = --
 ; EnableUnicode
 ; EnableXP
