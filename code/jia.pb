@@ -106,6 +106,9 @@ Procedure.i ReadExecuteWriteLoop()
 			Case "exit"
 				Break
 				
+			Case "cd"
+				PrintN(GetCurrentDirectory())
+				
 		EndSelect
 	ForEver	
 	
@@ -134,8 +137,8 @@ EndProcedure : End EntryPoint()
 
 
 ; IDE Options = PureBasic 5.20 beta 7 (Windows - x86)
-; CursorPosition = 77
-; FirstLine = 60
+; CursorPosition = 109
+; FirstLine = 94
 ; Folding = --
 ; EnableUnicode
 ; EnableXP
